@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Builder</title>
+<style>
+:root{--navy:#1E3A5F;--blue:#2F5D9E;--text:#1F2937;--muted:#64748B;--line:#D5DDE8}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;color:var(--text);font:15px "Segoe UI",Arial,sans-serif;display:flex;flex-direction:column;overflow:hidden;
+background:
+ radial-gradient(circle at 8% 10%,rgba(47,93,158,.16),transparent 42%),
+ radial-gradient(circle at 92% 90%,rgba(30,58,95,.14),transparent 45%),
+ linear-gradient(rgba(30,58,95,.045) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(30,58,95,.045) 1px,transparent 1px),
+ linear-gradient(135deg,#F1F5FA,#E6ECF4);
+background-size:auto,auto,28px 28px,28px 28px,auto}
+header{background:var(--navy);color:#fff;padding:11px 5%;display:flex;align-items:center;justify-content:space-between;gap:12px;flex:none}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-icon{width:36px;height:36px;display:grid;place-items:center;border:1px solid #7C93B3;border-radius:8px;font-size:19px;font-weight:700}
+.brand h1{margin:0;font-size:19px}
+.brand p{margin:2px 0 0;color:#C5D2E4;font-size:12px}
+.header-tag{font-size:12px;padding:6px 11px;border:1px solid #5B7596;border-radius:6px;color:#E3EAF4;white-space:nowrap}
+main{flex:1;min-height:0;width:min(1100px,94%);margin:0 auto;padding:12px 0 0;display:flex;flex-direction:column}
+.page{flex:1;min-height:0;display:flex;flex-direction:column;gap:11px;overflow:auto}
+.page.hidden{display:none}
+.page-heading{flex:none}
+.eyebrow{color:var(--blue);text-transform:uppercase;font-size:11px;font-weight:800;letter-spacing:1.3px}
+.page-heading h2{margin:2px 0 0;font-size:25px;color:var(--navy)}
+.card{background:rgba(255,255,255,.93);border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:10px;padding:15px 18px;box-shadow:0 3px 12px rgba(30,58,95,.08)}
+.card h3{color:var(--navy);margin:0 0 11px;font-size:16px}
+.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.mode-option{border:1px solid var(--line);border-radius:8px;padding:12px 14px;cursor:pointer;transition:.15s;background:#fff;display:flex;gap:11px;align-items:center}
+.mode-option strong{font-size:15px;color:var(--navy)}
+.mode-icon{font-size:24px;color:var(--blue)}
+.mode-option:hover{border-color:var(--blue)}
+.mode-option.active{border:2px solid var(--blue);padding:11px 13px;background:#EEF3FA}
+#specs{display:grid;gap:11px;grid-template-columns:1fr 1fr}
+#specs.single{grid-template-columns:1fr}
+.memory-block{border:1px solid var(--line);border-radius:8px;padding:13px;background:#F8FAFC}
+.memory-block h4{margin:0 0 11px;font-size:15px;color:var(--navy)}
+.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+#specs.single .input-grid{grid-template-columns:repeat(4,1fr)}
+label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:4px}
+input{width:100%;padding:9px 11px;border:1px solid #C3CEDC;border-radius:6px;color:var(--text);background:#fff;font:inherit;font-size:15px;outline:none}
+input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(47,93,158,.16)}
+.error{display:none;color:#B42318;background:#FEF3F2;border:1px solid #FECDCA;border-radius:6px;padding:9px;margin-top:11px;font-size:13px}
+.navigation{flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:11px 0 13px;padding:9px 15px;background:rgba(255,255,255,.94);border:1px solid var(--line);border-radius:9px;box-shadow:0 2px 8px rgba(30,58,95,.07)}
+.nav-status{color:var(--muted);font-size:13px}
+.nav-actions{display:flex;gap:10px}
+button{border:none;cursor:pointer;border-radius:6px;font:inherit;font-size:14px;font-weight:700;padding:10px 19px;transition:.15s}
+button:active{transform:translateY(1px)}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--navy)}
+.btn-secondary{background:#fff;color:var(--navy);border:1px solid #AEBBCD}.btn-secondary:hover{background:#EEF2F7}
+button:disabled{opacity:.4;cursor:not-allowed}
+.hidden{display:none!important}
+.table-wrap{width:100%;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{background:var(--navy);color:#fff;font-weight:600}
+tbody tr:nth-child(even){background:#F5F8FC}
+tbody tr:last-child td{border-bottom:none}
+td:first-child{font-weight:700;color:var(--navy)}
+.circuit-layout{flex:1;min-height:0;display:grid;grid-template-columns:1fr 180px;gap:11px}
+.diagram-wrap{flex:1;min-height:0;border:1px solid var(--line);border-radius:8px;background:#FBFCFE;padding:6px}
+#circuitSvg{width:100%;height:100%;display:block}
+.side{display:flex;flex-direction:column;gap:11px}
+.metric{background:#fff;border:1px solid var(--line);border-left:4px solid var(--blue);border-radius:8px;padding:12px 14px;flex:1;display:flex;flex-direction:column;justify-content:center;box-shadow:0 2px 8px rgba(30,58,95,.06)}
+.metric span{font-size:13px;color:var(--muted)}
+.metric strong{font-size:32px;color:var(--navy);line-height:1.15}
+.diagram-legend{display:flex;flex-wrap:wrap;gap:15px;padding-top:9px;color:var(--muted);font-size:12px}
+.legend-item{display:flex;align-items:center;gap:6px}
+.legend-color{width:12px;height:12px;border-radius:2px;display:inline-block}
+.chip-label{font-size:12px;font-weight:700;fill:#1E3A5F}
+.svg-small{font-size:11px;fill:#5B6B80}
+.svg-title{font-size:13px;font-weight:700;fill:#1E3A5F}
+.hero{flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 22px;border-radius:12px;color:#fff;background:linear-gradient(120deg,#1E3A5F,#2F5D9E);box-shadow:0 5px 16px rgba(30,58,95,.25);position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-40px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.07)}
+.hero .eyebrow{color:#BFD2EC}.hero h2{color:#fff;margin:2px 0 0;font-size:26px}
+.hero-art{width:230px;height:70px;flex:none;position:relative;z-index:1}
+.mode-icon{width:46px;height:46px;display:grid;place-items:center;background:#E3ECF8;border-radius:10px;flex:none;transition:.15s}
+.mode-option.active .mode-icon{background:var(--blue);color:#fff}
+.mode-option{box-shadow:0 2px 6px rgba(30,58,95,.06)}
+.mode-option:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(30,58,95,.14)}
+.mode-option.active{box-shadow:0 6px 16px rgba(47,93,158,.22)}
+.live{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.pill{background:#EEF3FA;border:1px solid #C9D6E8;border-radius:20px;padding:7px 14px;font-size:13px;color:var(--navy)}
+.pill b{margin-right:6px}.pill.bad{background:#FEF3F2;border-color:#FECDCA;color:#B42318}
+.progress{flex:1;max-width:260px;height:6px;background:#E1E8F1;border-radius:4px;overflow:hidden}
+.progress i{display:block;height:100%;width:33%;background:linear-gradient(90deg,#2F5D9E,#1E3A5F);border-radius:4px;transition:width .3s}
+th{position:sticky;top:0}
+#addrCard{min-height:180px}
+#addrCard .table-wrap{flex:1;min-height:0;overflow:auto}
+footer{flex:none;text-align:center;color:#7A8799;font-size:11px;padding:0 15px 8px}
+@media(max-width:800px){
+ .header-tag{display:none}.mode-grid,#specs,.circuit-layout{grid-template-columns:1fr}
+ #specs.single .input-grid{grid-template-columns:1fr 1fr}
+ .navigation{flex-direction:column;align-items:stretch}.nav-actions button{flex:1}
+ #circuitSvg{min-height:260px}.side{flex-direction:row}.metric strong{font-size:24px}
+}
+
+/* background: soft glows + faint circuit-board traces */
+body{background:radial-gradient(circle at 8% 10%,rgba(47,93,158,.18),transparent 42%),radial-gradient(circle at 92% 90%,rgba(30,58,95,.16),transparent 45%),linear-gradient(135deg,#F3F6FB,#E2E9F3);background-size:auto}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160' fill='none' stroke='%232F5D9E' stroke-opacity='.2' stroke-width='1.3'%3E%3Cpath d='M0 40h50l20 20h40'/%3E%3Cpath d='M160 110h-45l-20-20H60'/%3E%3Cpath d='M80 0v30l15 15v35'/%3E%3Cpath d='M30 160v-40l20-20'/%3E%3Cg fill='%232F5D9E' fill-opacity='.28' stroke='none'%3E%3Ccircle cx='110' cy='60' r='3'/%3E%3Ccircle cx='60' cy='90' r='3'/%3E%3Ccircle cx='95' cy='80' r='3'/%3E%3Ccircle cx='50' cy='100' r='3'/%3E%3Crect x='47' y='37' width='6' height='6' rx='1'/%3E%3C/g%3E%3C/svg%3E");
+ -webkit-mask-image:radial-gradient(ellipse at center,rgba(0,0,0,.3),#000 95%);mask-image:radial-gradient(ellipse at center,rgba(0,0,0,.3),#000 95%)}
+body::after{content:"";position:fixed;z-index:0;pointer-events:none;width:60vmax;height:60vmax;left:-15vmax;top:-20vmax;background:radial-gradient(circle,rgba(47,93,158,.18),transparent 65%);animation:drift 24s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(45vw,40vh)}}
+@media(prefers-reduced-motion:reduce){body::after{animation:none}}
+header,main,footer{position:relative;z-index:1}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="brand-icon">M</div>
+  <div><h1>Memory Builder</h1><p>Computer Architecture · Memory Organization</p></div></div>
+ <div class="header-tag">DESIGN WORKSPACE</div>
+</header>
+
+<main>
+<!-- PAGE 1: SETUP -->
+<section id="page1" class="page">
+ <div class="hero"><div><div class="eyebrow">Memory setup</div><h2>Configure Your Memory</h2></div>
+  <svg class="hero-art" viewBox="0 0 230 70" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="1.5">
+   <g fill="rgba(255,255,255,.12)"><rect x="8" y="16" width="44" height="38" rx="5"/><rect x="62" y="16" width="44" height="38" rx="5"/><rect x="116" y="16" width="44" height="38" rx="5"/><rect x="170" y="16" width="44" height="38" rx="5"/></g>
+   <path d="M18 16V6M30 16V6M42 16V6M72 16V6M84 16V6M96 16V6M126 16V6M138 16V6M150 16V6M180 16V6M192 16V6M204 16V6M18 54v10M30 54v10M42 54v10M72 54v10M84 54v10M96 54v10M126 54v10M138 54v10M150 54v10M180 54v10M192 54v10M204 54v10"/>
+   <g fill="#fff" stroke="none" font-size="12" font-weight="700" text-anchor="middle" font-family="Segoe UI,Arial"><text x="30" y="40">RAM</text><text x="84" y="40">RAM</text><text x="138" y="40">ROM</text><text x="192" y="40">ROM</text></g></svg></div>
+ <div class="card"><h3>01 / Select memory configuration</h3>
+  <div class="mode-grid">
+   <div class="mode-option active" data-mode="RAM" onclick="chooseMode('RAM')"><div class="mode-icon">▦</div><strong>RAM only</strong></div>
+   <div class="mode-option" data-mode="ROM" onclick="chooseMode('ROM')"><div class="mode-icon">▤</div><strong>ROM only</strong></div>
+   <div class="mode-option" data-mode="BOTH" onclick="chooseMode('BOTH')"><div class="mode-icon">▥</div><strong>RAM + ROM</strong></div>
+  </div></div>
+ <div class="card"><h3>02 / Enter memory specifications</h3>
+  <div id="specs" class="single">
+   <div id="ramFields" class="memory-block"><h4>RAM specifications</h4><div class="input-grid">
+    <div><label for="ramN">Chip words (N)</label><input id="ramN" type="number" min="1" value="128"></div>
+    <div><label for="ramW">Chip width (W)</label><input id="ramW" type="number" min="1" value="4"></div>
+    <div><label for="ramN1">Required words (N₁)</label><input id="ramN1" type="number" min="1" value="128"></div>
+    <div><label for="ramW1">Required width (W₁)</label><input id="ramW1" type="number" min="1" value="16"></div></div></div>
+   <div id="romFields" class="memory-block hidden"><h4>ROM specifications</h4><div class="input-grid">
+    <div><label for="romN">Chip words (N)</label><input id="romN" type="number" min="1" value="128"></div>
+    <div><label for="romW">Chip width (W)</label><input id="romW" type="number" min="1" value="8"></div>
+    <div><label for="romN1">Required words (N₁)</label><input id="romN1" type="number" min="1" value="256"></div>
+    <div><label for="romW1">Required width (W₁)</label><input id="romW1" type="number" min="1" value="8"></div></div></div>
+  </div>
+  <div class="live" id="live"></div>
+  <div id="errorBox" class="error"></div></div>
+</section>
+
+<!-- PAGE 2: RESULTS -->
+<section id="page2" class="page hidden">
+ <div class="page-heading"><div class="eyebrow">Design output</div><h2>Memory Design Results</h2></div>
+ <div class="card" style="flex:none"><h3>Chip expansion details</h3>
+  <div class="table-wrap"><table id="calculationTable"><thead><tr>
+   <th>Memory</th><th>Available</th><th>Required</th><th>p = N₁/N</th><th>q = W₁/W</th><th>Chips</th><th>Address lines x</th><th>Bank lines y</th><th>Type bit z</th>
+  </tr></thead><tbody></tbody></table></div></div>
+ <div class="card grow" id="addrCard"><h3>Memory address map</h3>
+  <div class="table-wrap"><table id="addressTable"><thead><tr><th>Chip</th><th>Bank</th><th>From address</th><th>To address</th></tr></thead><tbody></tbody></table></div></div>
+</section>
+
+<!-- PAGE 3: CIRCUIT -->
+<section id="page3" class="page hidden">
+ <div class="page-heading"><div class="eyebrow">Hardware layout</div><h2>Memory Circuit Diagram</h2></div>
+ <div class="circuit-layout">
+  <div class="card grow"><h3 id="circuitTitle">Memory organization</h3>
+   <div class="diagram-wrap"><svg id="circuitSvg" viewBox="0 0 760 350" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Memory circuit diagram"></svg></div>
+   <div class="diagram-legend">
+    <div class="legend-item"><span class="legend-color" style="background:#DCE8F7;border:1px solid #2F5D9E"></span>Memory chip</div>
+    <div class="legend-item"><span class="legend-color" style="background:#E3EFEA;border:1px solid #3F7F6B"></span>Decoder / selection</div>
+    <div class="legend-item"><span class="legend-color" style="background:#475569"></span>Address lines</div>
+    <div class="legend-item"><span class="legend-color" style="background:#2F5D9E"></span>Data lines</div>
+    <div class="legend-item"><span class="legend-color" style="background:#B45309"></span>Read/Write (RAM)</div></div></div>
+  <div class="side">
+   <div class="metric"><span>Total chips</span><strong id="chipMetric">4</strong></div>
+   <div class="metric"><span>Chips in parallel</span><strong id="parallelMetric">4</strong></div>
+   <div class="metric"><span>Memory banks</span><strong id="bankMetric">1</strong></div>
+  </div>
+ </div>
+</section>
+
+<div class="navigation">
+ <div class="nav-status" id="navStatus">Step 1 of 3 · Memory setup</div>
+ <div class="progress"><i id="bar"></i></div>
+ <div class="nav-actions">
+  <button id="backBtn" class="btn-secondary" onclick="goBack()" disabled>← Back</button>
+  <button id="nextBtn" class="btn-primary" onclick="goNext()">Next →</button>
+ </div>
+</div>
+</main>
+<footer>Memory Builder · Computer Architecture Project</footer>
+
+<script>
+let mode="RAM",currentPage=1,design=[];
+
+function chooseMode(s){
+ mode=s;
+ document.querySelectorAll(".mode-option").forEach(o=>o.classList.toggle("active",o.dataset.mode===s));
+ document.getElementById("ramFields").classList.toggle("hidden",s==="ROM");
+ document.getElementById("romFields").classList.toggle("hidden",s==="RAM");
+ document.getElementById("specs").classList.toggle("single",s!=="BOTH");
+ hideError();updateLive();
+}
+function showError(m){const b=document.getElementById("errorBox");b.textContent=m;b.style.display="block"}
+function hideError(){document.getElementById("errorBox").style.display="none"}
+function updateLive(){
+ const box=document.getElementById("live");box.replaceChildren();
+ const list=[];if(mode!=="ROM")list.push(["ram","RAM"]);if(mode!=="RAM")list.push(["rom","ROM"]);
+ list.forEach(([p,name])=>{
+  const g=k=>Number(document.getElementById(p+k).value);
+  const N=g("N"),W=g("W"),N1=g("N1"),W1=g("W1");
+  const ok=[N,W,N1,W1].every(v=>Number.isInteger(v)&&v>0)&&N1>=N&&W1>=W&&N1%N===0&&W1%W===0;
+  const pill=document.createElement("span");pill.className="pill"+(ok?"":" bad");
+  const b=document.createElement("b");b.textContent=name;pill.appendChild(b);
+  pill.appendChild(document.createTextNode(ok?`${N1/N} bank(s) × ${W1/W} chip(s) in parallel = ${(N1/N)*(W1/W)} chips`:"check the values"));
+  box.appendChild(pill);
+ });
+}
+document.addEventListener("input",updateLive);
+function getPositiveInteger(id,label){
+ const v=Number(document.getElementById(id).value);
+ if(!Number.isSafeInteger(v)||v<1)throw new Error(label+" must be a positive whole number.");
+ return v;
+}
+function readMemory(prefix,name){
+ const N=getPositiveInteger(prefix+"N",name+" available words");
+ const W=getPositiveInteger(prefix+"W",name+" available width");
+ const N1=getPositiveInteger(prefix+"N1",name+" required words");
+ const W1=getPositiveInteger(prefix+"W1",name+" required width");
+ if(N1<N||W1<W)throw new Error(name+": required dimensions must be at least as large as available dimensions.");
+ if(N1%N!==0||W1%W!==0)throw new Error(name+": required words and width must be exact multiples of the chip dimensions.");
+ return{name,N,W,N1,W1,p:N1/N,q:W1/W,chips:(N1/N)*(W1/W),x:Math.log2(N),y:Math.log2(N1/N)};
+}
+function calculateDesign(){
+ const m=[];
+ if(mode==="RAM"||mode==="BOTH")m.push(readMemory("ram","RAM"));
+ if(mode==="ROM"||mode==="BOTH")m.push(readMemory("rom","ROM"));
+ m.forEach(x=>{if(!Number.isInteger(x.x)||!Number.isInteger(x.y))
+  throw new Error(x.name+": chip words and bank count must be powers of two for whole-number address lines.")});
+ design=m;return m;
+}
+
+/* Flow: 1 Setup -> 2 Results -> 3 Circuit */
+function goNext(){
+ hideError();
+ if(currentPage===1){
+  try{calculateDesign()}catch(e){showError(e.message);return}
+  renderResults();currentPage=2;showPage();
+ }else if(currentPage===2){
+  currentPage=3;showPage();renderCircuit();
+ }else{currentPage=1;showPage()}
+}
+function goBack(){if(currentPage>1){currentPage--;showPage()}}
+function showPage(){
+ [1,2,3].forEach(n=>document.getElementById("page"+n).classList.toggle("hidden",n!==currentPage));
+ document.getElementById("backBtn").disabled=currentPage===1;
+ document.getElementById("nextBtn").textContent=currentPage===3?"Start Again ↻":"Next →";
+ document.getElementById("bar").style.width=(currentPage*33.34)+"%";
+ document.getElementById("navStatus").textContent=["","Step 1 of 3 · Memory setup","Step 2 of 3 · Design results","Step 3 of 3 · Circuit diagram"][currentPage];
+}
+
+function svgEl(tag,attrs={},text=""){
+ const el=document.createElementNS("http://www.w3.org/2000/svg",tag);
+ Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));
+ if(text!=="")el.textContent=text;return el;
+}
+function addRect(svg,x,y,w,h,fill,stroke,rx=5){svg.appendChild(svgEl("rect",{x,y,width:w,height:h,rx,fill,stroke,"stroke-width":1.6}))}
+function addText(svg,x,y,t,cls="svg-small",anchor="middle"){svg.appendChild(svgEl("text",{x,y,"text-anchor":anchor,class:cls},t))}
+function addLine(svg,x1,y1,x2,y2,color="#64748B",w=1.5){svg.appendChild(svgEl("line",{x1,y1,x2,y2,stroke:color,"stroke-width":w,"stroke-linecap":"round"}))}
+function addArrow(svg,x1,y1,x2,y2,color="#64748B"){
+ addLine(svg,x1,y1,x2,y2,color,1.8);
+ const a=Math.atan2(y2-y1,x2-x1),l=7;
+ svg.appendChild(svgEl("path",{d:`M ${x2-l*Math.cos(a-Math.PI/6)} ${y2-l*Math.sin(a-Math.PI/6)} L ${x2} ${y2} L ${x2-l*Math.cos(a+Math.PI/6)} ${y2-l*Math.sin(a+Math.PI/6)}`,fill:"none",stroke:color,"stroke-width":1.8}));
+}
+
+function rng(p,a,b){return b<a?"—":(a===b?p+a:p+a+"–"+p+b)}
+function addDot(svg,x,y,color){svg.appendChild(svgEl("circle",{cx:x,cy:y,r:2.8,fill:color}))}
+
+function renderCircuit(){
+ const svg=document.getElementById("circuitSvg");svg.replaceChildren();
+ const mems=design,combined=mems.length===2;
+ const cw=98,gap=12,chipStartX=380,pitch=90,trunkX=340,dx=170,dw=100;
+ const maxQ=Math.max(...mems.map(m=>m.q));
+ /* extra room on the right for the R/W wire (only when RAM is present) */
+ const hasRam=mems.some(m=>m.name==="RAM"),extra=hasRam?24:0;
+ const W=Math.max(640,chipStartX+maxQ*(cw+gap)+60+extra),dataX=W-34-extra;
+ const allBanks=mems.reduce((a,m)=>a+m.p,0);
+ const need=52+allBanks*pitch+60,H=Math.max(300,need),y0=52+(H-need)/2;
+ svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+ const AD="#475569",DT="#2F5D9E",CS="#3F7F6B",RW="#B45309",rwX=W-16;
+ let rwLast=null;
+ const rowTop=r=>y0+r*pitch;
+ const firstChipTop=rowTop(0)+14,lastChipBot=rowTop(allBanks-1)+64;
+ const dMid=(firstChipTop+lastChipBot)/2,yA=rowTop(allBanks-1)+76+22;
+ const dataBits=Math.max(...mems.map(m=>m.W1));
+
+ addText(svg,W/2,22,combined?"COMBINED RAM + ROM ORGANIZATION":mems[0].name+" MEMORY ORGANIZATION","svg-title");
+
+ /* address bus bar */
+ const barTop=firstChipTop-6,barBot=yA+8,barMid=(barTop+barBot)/2,barR=88;
+ addRect(svg,10,barTop,barR-10,barBot-barTop,"#E8EEF6","#7C93B3",6);
+ addText(svg,49,barMid-2,"Address","chip-label");
+ addText(svg,49,barMid+14,"bus","chip-label");
+
+ /* chip address lines (A0..x-1): bottom wire, trunk, rails drawn per row below */
+ addLine(svg,barR,yA,trunkX,yA,AD,1.8);addDot(svg,barR,yA,AD);
+ const addrLabel=combined?mems.map(m=>m.name+": "+rng("A",0,m.x-1)).join("   "):rng("A",0,mems[0].x-1);
+ addText(svg,98,yA-8,addrLabel,"chip-label","start");
+ addLine(svg,trunkX,yA,trunkX,rowTop(0)+76,AD,1.8);
+
+ /* data trunk */
+ addLine(svg,dataX,rowTop(0)+2,dataX,yA,DT,2.6);
+ addText(svg,dataX,yA+16,"Data bus","chip-label");
+ addText(svg,dataX,yA+30,rng("D",0,dataBits-1),"svg-small");
+
+ /* decoder */
+ addRect(svg,dx,firstChipTop,dw,lastChipBot-firstChipTop,"#E3EFEA","#3F7F6B",6);
+ const lines=[];
+ mems.forEach(m=>{if(m.y>0)lines.push(m.name+": "+rng("A",m.x,m.x+m.y-1))});
+ if(combined){const T=Math.max(...mems.map(m=>m.x+m.y));lines.push("Type: "+rng("A",T,T))}
+ const hasSel=lines.length>0;
+ if(!hasSel)lines.push("Chip enable");
+ let ty=dMid-lines.length*7.5+4;
+ addText(svg,dx+dw/2,ty,"Decoder","chip-label");
+ lines.forEach((l,i)=>addText(svg,dx+dw/2,ty+16*(i+1),l,"svg-small"));
+ addArrow(svg,barR,dMid,dx,dMid,AD);addDot(svg,barR,dMid,AD);
+ if(hasSel)addText(svg,98,dMid-8,"Select lines","svg-small","start");
+
+ /* rows */
+ let r=0;
+ mems.forEach((m,mi)=>{
+  const fill=m.name==="RAM"?"#DCE8F7":"#E5E9EF",stroke=m.name==="RAM"?"#2F5D9E":"#475569";
+  for(let b=0;b<m.p;b++){
+   const top=rowTop(r),cT=top+14,cy=top+39,cB=top+64,rD=top+2,rA=top+76;
+   addArrow(svg,dx+dw,cy,chipStartX-6,cy,CS);
+   addText(svg,305,cy-6,"CS"+(r+1),"svg-small");
+   const firstCx=chipStartX+cw/2,lastCx=chipStartX+(m.q-1)*(cw+gap)+cw/2;
+   addLine(svg,firstCx,rD,dataX,rD,DT,1.8);addDot(svg,dataX,rD,DT);
+   addLine(svg,trunkX,rA,lastCx,rA,AD,1.8);addDot(svg,trunkX,rA,AD);
+   /* R/W wire: enters from the right, hops over the data bus, runs behind the chips */
+   if(m.name==="RAM"){
+    const ry=cy+12;
+    svg.appendChild(svgEl("path",{d:`M ${rwX} ${ry} H ${dataX+5} A 5 5 0 0 0 ${dataX-5} ${ry} H ${chipStartX}`,fill:"none",stroke:RW,"stroke-width":1.6,"stroke-linecap":"round"}));
+    addDot(svg,rwX,ry,RW);rwLast=ry;
+   }
+   for(let c=0;c<m.q;c++){
+    const x=chipStartX+c*(cw+gap),cx=x+cw/2;
+    addLine(svg,cx,rD,cx,cT,DT,1.5);
+    addArrow(svg,cx,rA,cx,cB+1,AD);
+    addRect(svg,x,cT,cw,50,fill,stroke,5);
+    addText(svg,cx,cT+16,m.name+" "+(b+1)+"."+(c+1),"chip-label");
+    addText(svg,cx,cT+30,m.N+" × "+m.W,"svg-small");
+    addText(svg,cx,cT+43,rng("D",c*m.W,(c+1)*m.W-1),"svg-small");
+    if(m.name==="RAM")addArrow(svg,x+cw+9,cy+12,x+cw,cy+12,RW);
+   }
+   r++;
+  }
+ });
+
+ /* R/W vertical line + label */
+ if(rwLast!==null){
+  addLine(svg,rwX,38,rwX,rwLast,RW,1.6);
+  svg.appendChild(svgEl("text",{x:rwX,y:33,"text-anchor":"middle",class:"chip-label",style:"fill:#B45309"},"R/W"));
+ }
+
+ addText(svg,W/2,H-6,combined?"RAM: read/write · ROM: read only":mems[0].name==="RAM"?"RAM: read/write":"ROM: read only");
+
+ document.getElementById("circuitTitle").textContent=combined?"Combined RAM + ROM circuit":mems[0].name+" circuit";
+ document.getElementById("chipMetric").textContent=mems.reduce((s,m)=>s+m.chips,0);
+ document.getElementById("parallelMetric").textContent=mems.reduce((s,m)=>s+m.q,0);
+ document.getElementById("bankMetric").textContent=mems.reduce((s,m)=>s+m.p,0);
+}
+
+function fillRow(body,vals){
+ const tr=document.createElement("tr");
+ vals.forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td)});
+ body.appendChild(tr);
+}
+function renderResults(){
+ const body=document.querySelector("#calculationTable tbody");body.replaceChildren();
+ design.forEach(m=>fillRow(body,[m.name,m.N+" × "+m.W,m.N1+" × "+m.W1,m.p,m.q,m.chips,m.x,m.y,design.length===2?1:0]));
+ const ab=document.querySelector("#addressTable tbody");ab.replaceChildren();
+ let start=0;
+ const hex=n=>"0x"+n.toString(16).toUpperCase().padStart(4,"0");
+ design.forEach((m,mi)=>{
+  for(let b=0;b<m.p;b++){
+   const from=start+b*m.N,to=from+m.N-1;
+   for(let c=0;c<m.q;c++)
+    fillRow(ab,[m.name+" "+(b+1)+"."+(c+1),"Bank "+(b+1),hex(from),hex(to)]);
+  }
+  start+=m.N1;
+ });
+}
+showPage();updateLive();
+</script>
+</body>
+</html>
